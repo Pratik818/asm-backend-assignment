@@ -1,0 +1,23 @@
+[project]
+name = "asm-asset-discovery-service"
+version = "0.1.0"
+description = "ASM Platform — Asset Discovery Service (domain management and passive DNS discovery)"
+requires-python = ">=3.12"
+
+# Runtime and dev dependencies are managed via requirements.txt / requirements-dev.txt,
+# not here — this keeps the same manifest used locally in sync with the one Docker builds from.
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
