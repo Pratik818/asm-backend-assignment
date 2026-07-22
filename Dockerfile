@@ -11,9 +11,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
 COPY alembic.ini .
 COPY migrations ./migrations
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY pyproject.toml .
+RUN pip install --no-cache-dir -e . --no-deps
 
 EXPOSE 8000
 
-ENTRYPOINT ["/entrypoint.sh"]
+CMD sh -c "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"

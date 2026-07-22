@@ -32,12 +32,11 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-asm@postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-asm_db}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./app:/app/app
     ports:
       - "${APP_PORT:-8000}:8000"
     depends_on:
@@ -52,9 +51,11 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     entrypoint: ["celery", "-A", "app.workers.celery_app", "worker", "--loglevel=info"]
-    environment:
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./app:/app/app
     depends_on:
       redis:
         condition: service_healthy

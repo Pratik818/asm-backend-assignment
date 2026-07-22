@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "asm-asset-discovery-service"
 version = "0.1.0"
@@ -6,6 +10,14 @@ requires-python = ">=3.12"
 
 # Runtime and dev dependencies are managed via requirements.txt / requirements-dev.txt,
 # not here — this keeps the same manifest used locally in sync with the one Docker builds from.
+# This file's [project] section exists only to make `pip install -e .` register
+# the `asm` console script below.
+
+[project.scripts]
+asm = "app.cli:asm"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
 
 [tool.black]
 line-length = 100
@@ -17,6 +29,23 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency injection relies on `= Depends(...)` as a default
+# argument value — not a mutable-default bug, so exempt it (and the other
+# fastapi param functions) from B008 instead of reverting to Annotated[...].
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Body",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    # Our own RBAC dependency factory — same reasoning as Depends() itself:
+    # require_role(...) just returns a closure, evaluated once at route
+    # definition time, not a mutable-default bug.
+    "app.core.dependencies.require_role",
+]
 
 [tool.isort]
 profile = "black"
