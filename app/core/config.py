@@ -1,6 +1,7 @@
 from functools import lru_cache
-from typing import Literal
+from typing import Any, Literal
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
 
@@ -31,7 +32,21 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_seconds: int = 3600
 
+    dns_resolve_timeout: float = 3.0
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _blank_values_use_defaults(cls, data: Any) -> Any:
+        # docker-compose's `env_file:` (unlike its `${VAR:-default}` syntax)
+        # passes an empty value through as a real empty string, not "unset" —
+        # so an untouched .env.example line like `POSTGRES_USER=` would
+        # otherwise override this field's default with "". Treat blank the
+        # same as absent for every field, matching Compose's own semantics.
+        if isinstance(data, dict):
+            return {key: value for key, value in data.items() if value != ""}
+        return data
 
     @property
     def database_url(self) -> str:

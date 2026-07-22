@@ -19,8 +19,7 @@ def register(
     _current_user: User = Depends(require_role(UserRole.ADMIN)),
 ):
     service = AuthService(db)
-    user = service.register(command)
-    return UserResponse.model_validate(user)
+    return service.register(command)
 
 
 @auth_router.post("/login", response_model=TokenResponse)
