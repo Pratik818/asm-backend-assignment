@@ -1,6 +1,35 @@
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+from sqlalchemy import text
+
+from app.core.config import get_settings
+from app.core.logging import configure_logging
+from app.db.session import engine
+from app.workers.tasks import ping
+
+configure_logging()
+
+settings = get_settings()
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
+    logger.info("Database connectivity verified")
+
+    ping.delay().get(timeout=5)
+    logger.info("Celery worker connectivity verified")
+
+    yield
+
 
 app = FastAPI(
-    title="ASM Asset Discovery Service",
-    version="0.1.0",
+    title=settings.app_name,
+    version=settings.app_version,
+    lifespan=lifespan,
 )
