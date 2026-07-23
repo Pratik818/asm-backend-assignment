@@ -38,10 +38,10 @@ def create_access_token(subject: str, role: str) -> str:
         "sub": subject,
         "role": role,
         "iat": now,
-        "exp": now + timedelta(seconds=settings.jwt_expire_seconds),
+        "exp": now + timedelta(seconds=settings.JWT_EXPIRE_SECONDS),
     }
-    return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 
 def decode_access_token(token: str) -> dict[str, Any]:
-    return jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+    return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])

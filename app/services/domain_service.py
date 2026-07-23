@@ -33,9 +33,7 @@ class DomainService:
             ) from exc
 
         scan = self.scan_repository.create(
-            Scan(
-                domain_id=domain.id, status=ScanStatus.PENDING, triggered_by=None
-            )  # same as whoever created
+            Scan(domain_id=domain.id, status=ScanStatus.PENDING, triggered_by=created_by)
         )
         discover_domain.delay(str(scan.id))
 

@@ -7,33 +7,37 @@ from sqlalchemy.engine import URL
 
 
 class Settings(BaseSettings):
-    app_name: str = "ASM Asset Discovery Service"
-    app_version: str = "0.1.0"
-    environment: Literal["development", "staging", "production"] = "development"
-    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    APP_NAME: str = "ASM Asset Discovery Service"
+    APP_VERSION: str = "0.1.0"
+    ENVIRONMENT: Literal["development", "staging", "production"] = "development"
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
-    # Single source of truth for Postgres credentials — reused by both the
-    # docker-compose "db" service and this connection string, so there is
-    # nothing left to keep in sync manually. postgres_host/postgres_port
-    # default to the values correct *inside* the docker-compose network;
-    # override them (e.g. POSTGRES_HOST=localhost) only when running the API
-    # directly on the host against the dockerized Postgres.
-    postgres_user: str = "postgres"
-    postgres_password: str = "asm@postgres"
-    postgres_db: str = "asm_db"
-    postgres_host: str = "db"
-    postgres_port: int = 5432
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "asm@postgres"
+    POSTGRES_DB: str = "asm_db"
+    # "localhost" is correct for running the API directly or running pytest,
+    # both always on the host machine. docker-compose.yml sets POSTGRES_HOST
+    # explicitly to "db" for the api/worker containers, overriding this.
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: int = 5432
 
-    # Same reasoning for Redis/Celery.
-    redis_host: str = "redis"
-    redis_port: int = 6379
+    # Dedicated database for the pytest suite (tests/conftest.py) — always
+    # this name, on the same Postgres server, regardless of POSTGRES_DB
+    # above. Keeps test runs isolated from real data without needing an
+    # env var override.
+    POSTGRES_TEST_DB: str = "asm_db_test"
 
-    jwt_secret_key: str = "change-me-in-production-this-default-is-not-secret-at-all"
-    jwt_algorithm: str = "HS256"
-    jwt_expire_seconds: int = 3600
+    # Same reasoning as POSTGRES_HOST — docker-compose.yml overrides this to
+    # "redis" for the api/worker containers.
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
 
-    dns_resolve_timeout: float = 3.0
-    dns_resolve_retries: int = 3
+    JWT_SECRET_KEY: str = "change-me-in-production-this-default-is-not-secret-at-all"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_SECONDS: int = 3600
+
+    DNS_RESOLVE_TIMEOUT: float = 3.0
+    DNS_RESOLVE_RETRIES: int = 3
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
@@ -53,20 +57,20 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         return URL.create(
             drivername="postgresql+psycopg",
-            username=self.postgres_user,
-            password=self.postgres_password,
-            host=self.postgres_host,
-            port=self.postgres_port,
-            database=self.postgres_db,
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_HOST,
+            port=self.POSTGRES_PORT,
+            database=self.POSTGRES_DB,
         ).render_as_string(hide_password=False)
 
     @property
     def celery_broker_url(self) -> str:
-        return f"redis://{self.redis_host}:{self.redis_port}/0"
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
 
     @property
     def celery_result_backend(self) -> str:
-        return f"redis://{self.redis_host}:{self.redis_port}/1"
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/1"
 
 
 @lru_cache

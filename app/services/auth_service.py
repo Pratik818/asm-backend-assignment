@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -10,6 +12,7 @@ from app.schemas.auth import TokenResponse
 from app.schemas.user import RegisterRequest
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 
 class AuthService:
@@ -46,9 +49,10 @@ class AuthService:
                 "This account has been deactivated", status_code=401, error_code="INACTIVE_USER"
             )
 
+        logger.info("login succeeded", extra={"email": email, "user_id": str(user.id)})
         access_token = create_access_token(subject=str(user.id), role=user.role.value)
         return TokenResponse(
             access_token=access_token,
             token_type="bearer",
-            expires_in=settings.jwt_expire_seconds,
+            expires_in=settings.JWT_EXPIRE_SECONDS,
         )

@@ -27,6 +27,12 @@ def _error_response(status_code: int, message: str, error_code: str) -> JSONResp
 def register_exception_handlers(app: FastAPI):
     @app.exception_handler(AppException)
     async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
+        if exc.status_code in (401, 403):
+            logger.warning(
+                "auth event: %s",
+                exc.error_code,
+                extra={"path": request.url.path, "status_code": exc.status_code},
+            )
         return _error_response(exc.status_code, exc.message, exc.error_code)
 
     @app.exception_handler(RequestValidationError)

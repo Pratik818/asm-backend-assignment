@@ -32,6 +32,9 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    environment:
+      POSTGRES_HOST: db
+      REDIS_HOST: redis
     env_file:
       - path: .env
         required: false
@@ -51,6 +54,9 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     entrypoint: ["celery", "-A", "app.workers.celery_app", "worker", "--loglevel=info"]
+    environment:
+      POSTGRES_HOST: db
+      REDIS_HOST: redis
     env_file:
       - path: .env
         required: false
