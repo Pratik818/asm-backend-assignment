@@ -42,9 +42,7 @@ cp .env.example .env
 through the API — that's what the `asm` CLI is for:
 
 ```bash
-From Docker :
-step 1 : docker exec -it <docker_id> or <docker_name> /bin/bash ( to get into docker terminal )
-step 2 :  asm create-admin --email admin@example.com --password 'Str0ngPass!23' --full-name "Admin User"
+docker compose exec api asm create-admin --email admin@example.com --password 'Str0ngPass!23' --full-name "Admin User"
 ```
 
 - All three flags are required; `--password value` and `--password=value` both work.
