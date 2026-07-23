@@ -65,9 +65,20 @@ curl -X POST http://localhost:8000/auth/login \
 ## Running without Docker
 
 Only useful for local development/debugging outside a container:
-
-```bash
+``` bash
+# Linux/macOS
 python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e . --no-deps   # registers the `asm` console script
+
+docker compose up -d db redis   # still need Postgres/Redis running somewhere
+alembic upgrade head
+uvicorn app.main:app --reload
+
+
+# Windows (PowerShell)
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 pip install -e . --no-deps   # registers the `asm` console script
 
