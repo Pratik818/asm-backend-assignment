@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "ASM Platform — Asset Discovery Service (domain management and passive DNS discovery)"
 requires-python = ">=3.12"
 
-# Runtime and dev dependencies are managed via requirements.txt / requirements-dev.txt,
+# All dependencies (runtime and dev/test tooling) are managed via requirements.txt,
 # not here — this keeps the same manifest used locally in sync with the one Docker builds from.
 # This file's [project] section exists only to make `pip install -e .` register
 # the `asm` console script below.

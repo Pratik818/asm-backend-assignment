@@ -68,7 +68,7 @@ Only useful for local development/debugging outside a container:
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 pip install -e . --no-deps   # registers the `asm` console script
 
 docker compose up -d db redis   # still need Postgres/Redis running somewhere
@@ -84,7 +84,7 @@ needed unless you've changed the published ports.
 
 ```bash
 docker compose up -d db      # only the database is needed — Celery runs in-process during tests
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 pytest
 ```
 
