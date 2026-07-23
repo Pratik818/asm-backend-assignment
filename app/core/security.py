@@ -21,7 +21,7 @@ def verify_password(password: str, password_hash: str) -> bool:
     return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
 
 
-def validate_password_strength(password: str) -> None:
+def validate_password_strength(password: str):
     if len(password) < PASSWORD_MIN_LENGTH:
         raise ValueError(f"Password must be at least {PASSWORD_MIN_LENGTH} characters long")
     if len(password.encode("utf-8")) > PASSWORD_MAX_LENGTH:

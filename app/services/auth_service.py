@@ -13,7 +13,7 @@ settings = get_settings()
 
 
 class AuthService:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session):
         self.user_repository = UserRepository(db)
 
     def register(self, command: RegisterRequest) -> User:

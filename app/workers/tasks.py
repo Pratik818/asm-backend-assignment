@@ -17,7 +17,7 @@ def ping() -> str:
 
 
 @celery_app.task(name="discover_domain")
-def discover_domain(scan_id: str) -> None:
+def discover_domain(scan_id: str):
     db = SessionLocal()
     try:
         scan = db.get(Scan, uuid.UUID(scan_id))

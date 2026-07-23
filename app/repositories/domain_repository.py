@@ -8,7 +8,7 @@ from app.models.enums import DomainStatus
 
 
 class DomainRepository:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session):
         self.db = db
 
     def get_by_name(self, name: str) -> Domain | None:
@@ -27,7 +27,7 @@ class DomainRepository:
         self.db.refresh(domain)
         return domain
 
-    def delete(self, domain: Domain) -> None:
+    def delete(self, domain: Domain):
         self.db.delete(domain)
         self.db.commit()
 

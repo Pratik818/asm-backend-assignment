@@ -14,7 +14,7 @@ from app.workers.tasks import discover_domain
 
 
 class DomainService:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session):
         self.domain_repository = DomainRepository(db)
         self.scan_repository = ScanRepository(db)
 
@@ -54,6 +54,6 @@ class DomainService:
             page=page, limit=limit, status=status, search=search
         )
 
-    def delete_domain(self, domain_id: uuid.UUID) -> None:
+    def delete_domain(self, domain_id: uuid.UUID):
         domain = self.get_domain(domain_id)
         self.domain_repository.delete(domain)

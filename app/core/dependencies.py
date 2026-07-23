@@ -1,7 +1,7 @@
 import uuid
 
 import jwt
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Query
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import AppException
@@ -59,3 +59,13 @@ def require_role(*allowed_roles: UserRole):
         return current_user
 
     return dependency
+
+
+class Pagination:
+    def __init__(
+        self,
+        page: int = Query(default=1, ge=1),
+        limit: int = Query(default=20, ge=1, le=100),
+    ):
+        self.page = page
+        self.limit = limit

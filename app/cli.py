@@ -8,7 +8,7 @@ from app.repositories.user_repository import UserRepository
 
 
 @click.group()
-def asm() -> None:
+def asm():
     """ASM Asset Discovery Service CLI."""
 
 
@@ -16,7 +16,7 @@ def asm() -> None:
 @click.option("--email", required=True)
 @click.option("--password", required=True)
 @click.option("--full-name", required=True)
-def create_admin(email: str, password: str, full_name: str) -> None:
+def create_admin(email: str, password: str, full_name: str):
     email = email.lower()
     try:
         validate_password_strength(password)

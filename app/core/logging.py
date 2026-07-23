@@ -20,7 +20,7 @@ class JSONFormatter(logging.Formatter):
         return json.dumps(payload)
 
 
-def configure_logging() -> None:
+def configure_logging():
     settings = get_settings()
 
     handler = logging.StreamHandler(sys.stdout)

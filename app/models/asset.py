@@ -22,3 +22,4 @@ class Asset(BaseModel):
     value: Mapped[str] = mapped_column(String, nullable=False)
 
     scan = relationship("Scan", back_populates="assets")
+    domain = relationship("Domain")
