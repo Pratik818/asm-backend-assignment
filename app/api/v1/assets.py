@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import Pagination, get_current_user
@@ -16,7 +16,7 @@ assets_router = APIRouter(prefix="/assets", tags=["assets"])
 @assets_router.get("", response_model=AssetListResponse)
 def list_assets(
     domain_id: uuid.UUID | None = None,
-    type: AssetType | None = None,
+    type: list[AssetType] | None = Query(default=None),
     pagination: Pagination = Depends(Pagination),
     db: Session = Depends(get_db),
     _current_user: User = Depends(get_current_user),

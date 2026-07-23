@@ -26,7 +26,7 @@ class AssetRepository:
         page: int,
         limit: int,
         domain_id: uuid.UUID | None = None,
-        type: AssetType | None = None,
+        type: list[AssetType] | None = None,
     ) -> tuple[list[Asset], int]:
         query = select(Asset).options(joinedload(Asset.domain))
         count_query = select(func.count()).select_from(Asset)
@@ -34,9 +34,9 @@ class AssetRepository:
         if domain_id is not None:
             query = query.where(Asset.domain_id == domain_id)
             count_query = count_query.where(Asset.domain_id == domain_id)
-        if type is not None:
-            query = query.where(Asset.type == type)
-            count_query = count_query.where(Asset.type == type)
+        if type:
+            query = query.where(Asset.type.in_(type))
+            count_query = count_query.where(Asset.type.in_(type))
 
         total = self.db.scalar(count_query) or 0
         items = list(

@@ -16,7 +16,7 @@ class AssetService:
         page: int,
         limit: int,
         domain_id: uuid.UUID | None,
-        type: AssetType | None,
+        type: list[AssetType] | None,
     ) -> tuple[list[Asset], int]:
         return self.asset_repository.list_paginated(
             page=page, limit=limit, domain_id=domain_id, type=type
