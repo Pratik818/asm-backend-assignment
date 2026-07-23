@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     jwt_expire_seconds: int = 3600
 
     dns_resolve_timeout: float = 3.0
+    dns_resolve_retries: int = 3
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

@@ -14,14 +14,15 @@ def resolve_records(domain_name: str, record_type: AssetType) -> list[str]:
     resolver.timeout = settings.dns_resolve_timeout
     resolver.lifetime = settings.dns_resolve_timeout
 
-    try:
-        answers = resolver.resolve(domain_name, record_type.value)
-    except (
-        dns.resolver.NoAnswer,
-        dns.resolver.NXDOMAIN,
-        dns.resolver.NoNameservers,
-        dns.exception.Timeout,
-    ):
-        return []
+    last_error: Exception | None = None
+    for _attempt in range(1 + settings.dns_resolve_retries):
+        try:
+            answers = resolver.resolve(domain_name, record_type.value)
+        except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN):
+            return []
+        except (dns.resolver.NoNameservers, dns.exception.Timeout) as exc:
+            last_error = exc
+            continue
+        return [str(rdata).rstrip(".") for rdata in answers]
 
-    return [str(rdata).rstrip(".") for rdata in answers]
+    raise last_error
