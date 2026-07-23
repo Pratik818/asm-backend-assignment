@@ -1,7 +1,7 @@
 import uuid
 
 import jwt
-from fastapi import Depends, Header, Query
+from fastapi import Depends, Header, Query, Request
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import AppException
@@ -69,3 +69,12 @@ class Pagination:
     ):
         self.page = page
         self.limit = limit
+
+
+class RequestContext:
+    def __init__(self, request: Request):
+        self.ip_address = request.client.host if request.client else None
+        self.user_agent = request.headers.get("user-agent")
+
+    def as_metadata(self) -> dict:
+        return {"ip_address": self.ip_address, "user_agent": self.user_agent}

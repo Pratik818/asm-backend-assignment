@@ -1,6 +1,7 @@
 from app.models.asset import Asset
 from app.models.domain import Domain
+from app.models.event_log import EventLog
 from app.models.scan import Scan
 from app.models.user import User
 
-__all__ = ["Asset", "Domain", "Scan", "User"]
+__all__ = ["Asset", "Domain", "EventLog", "Scan", "User"]

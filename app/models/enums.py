@@ -26,3 +26,8 @@ class AssetType(enum.StrEnum):
     AAAA = "AAAA"
     NS = "NS"
     MX = "MX"
+
+
+class EventType(enum.StrEnum):
+    DOMAIN_CREATED = "DOMAIN_CREATED"
+    DOMAIN_DELETED = "DOMAIN_DELETED"

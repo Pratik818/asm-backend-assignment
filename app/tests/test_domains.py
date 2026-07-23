@@ -1,5 +1,10 @@
 import uuid
 
+from sqlalchemy import select
+
+from app.models.enums import EventType
+from app.models.event_log import EventLog
+
 from .conftest import auth_headers, create_domain
 
 
@@ -33,6 +38,51 @@ def test_create_domain_rejects_duplicate(client, admin_user):
     second = client.post("/domains", json=payload, headers=auth_headers(admin_user))
     assert second.status_code == 409
     assert second.json()["error_code"] == "DOMAIN_ALREADY_EXISTS"
+
+
+def test_create_domain_writes_audit_log(client, admin_user, db_session):
+    domain_name = f"test-{uuid.uuid4().hex[:8]}.example.org"
+    response = client.post(
+        "/domains", json={"domain": domain_name}, headers=auth_headers(admin_user)
+    )
+    assert response.status_code == 201
+
+    events = db_session.scalars(
+        select(EventLog).where(EventLog.event_type == EventType.DOMAIN_CREATED)
+    ).all()
+    matching = [e for e in events if e.event_metadata.get("domain") == domain_name]
+    assert len(matching) == 1
+    assert matching[0].user_id == admin_user.id
+
+
+def test_create_domain_duplicate_does_not_write_audit_log(client, admin_user, db_session):
+    payload = {"domain": f"test-{uuid.uuid4().hex[:8]}.example.org"}
+    first = client.post("/domains", json=payload, headers=auth_headers(admin_user))
+    assert first.status_code == 201
+
+    second = client.post("/domains", json=payload, headers=auth_headers(admin_user))
+    assert second.status_code == 409
+
+    events = db_session.scalars(
+        select(EventLog).where(EventLog.event_type == EventType.DOMAIN_CREATED)
+    ).all()
+    matching = [e for e in events if e.event_metadata.get("domain") == payload["domain"]]
+    assert len(matching) == 1
+
+
+def test_delete_domain_writes_audit_log(client, admin_user, db_session):
+    domain = create_domain(db_session, admin_user.id)
+    domain_name = domain.name
+
+    response = client.delete(f"/domains/{domain.id}", headers=auth_headers(admin_user))
+    assert response.status_code == 204
+
+    events = db_session.scalars(
+        select(EventLog).where(EventLog.event_type == EventType.DOMAIN_DELETED)
+    ).all()
+    matching = [e for e in events if e.event_metadata.get("domain") == domain_name]
+    assert len(matching) == 1
+    assert matching[0].user_id == admin_user.id
 
 
 def test_create_domain_rejects_invalid_fqdn(client, admin_user):

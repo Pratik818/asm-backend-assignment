@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import Pagination, get_current_user, require_role
+from app.core.dependencies import Pagination, RequestContext, get_current_user, require_role
 from app.db.session import get_db
 from app.models.enums import DomainStatus, UserRole
 from app.models.user import User
@@ -37,9 +37,12 @@ def create_domain(
     command: DomainCreateRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_role(UserRole.ADMIN, UserRole.ANALYST)),
+    request_context: RequestContext = Depends(RequestContext),
 ):
     service = DomainService(db)
-    return service.create_domain(command, created_by=current_user.id)
+    return service.create_domain(
+        command, created_by=current_user.id, **request_context.as_metadata()
+    )
 
 
 @domains_router.get("/{domain_id}", response_model=DomainResponse)
@@ -56,10 +59,11 @@ def get_domain(
 def delete_domain(
     domain_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _current_user: User = Depends(require_role(UserRole.ADMIN)),
+    current_user: User = Depends(require_role(UserRole.ADMIN)),
+    request_context: RequestContext = Depends(RequestContext),
 ):
     service = DomainService(db)
-    service.delete_domain(domain_id)
+    service.delete_domain(domain_id, deleted_by=current_user.id, **request_context.as_metadata())
 
 
 @domains_router.post(

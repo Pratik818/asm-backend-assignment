@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import UTC, datetime
 
@@ -9,6 +10,8 @@ from app.models.scan import Scan
 from app.repositories.asset_repository import AssetRepository
 from app.workers.celery_app import celery_app
 from app.workers.dns_resolver import RECORD_TYPES, resolve_records
+
+logger = logging.getLogger(__name__)
 
 
 @celery_app.task(name="ping")
@@ -22,6 +25,7 @@ def discover_domain(scan_id: str):
     try:
         scan = db.get(Scan, uuid.UUID(scan_id))
         if scan is None:
+            logger.warning("scan not found, skipping", extra={"scan_id": scan_id})
             return
 
         domain = db.get(Domain, scan.domain_id)
@@ -31,6 +35,10 @@ def discover_domain(scan_id: str):
         if domain is not None:
             domain.status = DomainStatus.RUNNING
         db.commit()
+        logger.info(
+            "scan started",
+            extra={"scan_id": scan_id, "domain_id": str(scan.domain_id)},
+        )
 
         try:
             assets = []
@@ -53,6 +61,10 @@ def discover_domain(scan_id: str):
             if domain is not None:
                 domain.status = DomainStatus.FAILED
             db.commit()
+            logger.exception(
+                "scan failed",
+                extra={"scan_id": scan_id, "domain_id": str(scan.domain_id)},
+            )
             return
 
         scan.status = ScanStatus.COMPLETED
@@ -60,5 +72,13 @@ def discover_domain(scan_id: str):
         if domain is not None:
             domain.status = DomainStatus.COMPLETED
         db.commit()
+        logger.info(
+            "scan completed",
+            extra={
+                "scan_id": scan_id,
+                "domain_id": str(scan.domain_id),
+                "asset_count": len(assets),
+            },
+        )
     finally:
         db.close()
